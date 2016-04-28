@@ -1,0 +1,36 @@
+How-much-was-each-individual-animal-fed-per-day-on-average?
+
+SELECT animal_id,animal_name, AVG(SELECT COUNT(feed_id) AS FEED FROM ANIMAL GROUP BY animal_id) as AVERAGE
+FROM ANIMAL
+GROUP BY animal_name;
+
+
+How-many-times-per-day-are-animals-fed-on-average?-Group-by-species.
+
+SELECT a.animal_name,a.animal_id,f.feed_id, AVG(SELECT COUNT(f.feed_id) FROM FEEDING_SCHED GROUP BY f.animal_id) AS AVERAGE
+FROM FEEDING SCHED f
+JOIN ANIMAL a
+ON a.animal_id = f.animal_id
+GROUP BY species_id;
+
+How-much-food-is-wasted-per-zoo?
+
+SELECT(s.QTY - f.feed_amount) AS WASTAGE, ((s.QTY-f.feed_amount)/s.QTY * 100) AS PERCENTAGE
+FROM FEEDING_SCHED f
+JOIN SHIPMENT s
+ON f.animal_id=s.animal_id
+JOIN ZOO z
+ON z.animal_id =s.animal_id
+GROUP BY zoo_id;
+
+
+Which-species-of-animal-at-which-zoos-are-being-fed-above/below-average-(by-species)-by-some-percentage?
+
+CREATE VIEW zooview AS
+SELECT a.animal_id,a.animal_name,z.zid
+FROM ZOO z
+JOIN ANIMAL a
+ON a.animal_id = z.animal_id
+JOIN FEEDING_SCHED f
+ON f.animal_id=a.animal_id
+WHERE f.feed_amount >f.feed_amount + 0.2 *( AVG( SELECT SUM(f.feed_amount) FROM FEEDING_SCHED GROUP BY species_id));
